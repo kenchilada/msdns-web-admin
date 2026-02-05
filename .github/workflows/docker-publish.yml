@@ -1,0 +1,32 @@
+# Build and push Docker image to GitHub Container Registry (ghcr.io).
+# Use the image in Dockge with: image: ghcr.io/kenchilada/msdns-web-admin:latest
+name: Build and push image
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/kenchilada/msdns-web-admin:latest
+            ghcr.io/kenchilada/msdns-web-admin:${{ github.sha }}

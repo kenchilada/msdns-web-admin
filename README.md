@@ -21,8 +21,28 @@ Designed to run on **Dockge** (recommended) or **TrueNAS Scale** as a custom app
 
 ## Quick start with Dockge
 
-1. In Dockge, create a new stack (e.g. `msdns`) and point it at this repo or a folder with the same files.
-2. Set environment variables (or use a `.env` file). **Only the DNS server host** is in env; you sign in with your Windows account on the login page.
+Dockge typically doesn’t build images from a Git repo, so this project publishes a pre-built image to [GitHub Container Registry](https://github.com/kenchilada/msdns-web-admin/pkgs/container/msdns-web-admin). Use that image in Dockge (no `build:` step).
+
+1. **Create a new Compose** in Dockge (e.g. name: `msdns-web-admin`).
+
+2. **Paste this in the Compose / services YAML** (replace any existing `services:` block):
+
+   ```yaml
+   services:
+     msdns:
+       image: ghcr.io/kenchilada/msdns-web-admin:latest
+       container_name: msdns-manager
+       restart: unless-stopped
+       ports:
+         - "8766:8000"
+       environment:
+         - WINDOWS_DNS_HOST=${WINDOWS_DNS_HOST:-}
+         - WINRM_USE_HTTPS=${WINRM_USE_HTTPS:-false}
+         - WINRM_PORT=${WINRM_PORT:-}
+         - SECRET_KEY=${SECRET_KEY:-change-this-secret}
+   ```
+
+3. **Set environment variables** in Dockge’s .env / env section:
 
    | Variable | Description |
    |----------|-------------|
@@ -31,7 +51,9 @@ Designed to run on **Dockge** (recommended) or **TrueNAS Scale** as a custom app
    | `WINRM_PORT` | Optional; default 5985 or 5986 |
    | `SECRET_KEY` | Secret for JWT; set to a random string in production |
 
-3. Deploy the stack. Open the app (e.g. `http://your-host:8765`), sign in with your **Windows username and password** (the account that has DNS access), then select a zone and manage A records.
+4. **Deploy.** Open the app at `http://your-host:8766`, sign in with your **Windows username and password** (the account that has DNS access), then select a zone and manage records.
+
+The image is built automatically on push to `master` (see [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)). After the first run, `ghcr.io/kenchilada/msdns-web-admin:latest` is public and no login is needed to pull.
 
 ## Enabling WinRM on Windows
 
