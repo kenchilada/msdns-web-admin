@@ -1,0 +1,18 @@
+# MS DNS Manager - for Dockge or docker-compose
+# Connect to Windows DNS server via WinRM and manage A records.
+
+services:
+  msdns:
+    build: .
+    container_name: msdns-manager
+    restart: unless-stopped
+    ports:
+      - "8766:8000"
+    environment:
+      # Windows DNS server (host only; user/password entered at login)
+      - WINDOWS_DNS_HOST=${WINDOWS_DNS_HOST:-}
+      - WINRM_USE_HTTPS=${WINRM_USE_HTTPS:-false}
+      - WINRM_PORT=${WINRM_PORT:-}
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret}
+    # Optional: use .env file instead of Dockge env
+    # env_file: .env

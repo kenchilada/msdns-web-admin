@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MS DNS Manager</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="login-screen">
+      <div class="card login-card">
+        <h1>MS DNS Manager</h1>
+        <p class="subtitle">Manage DNS records on Windows DNS</p>
+        <p class="hint">Sign in with your Windows account (DNS server access). Try <strong>username</strong> or <strong>domain\username</strong>.</p>
+        <form id="login-form">
+          <label for="username">Windows username</label>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="e.g. user or domain\user" required />
+          <label for="password">Windows password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+          <button type="submit" id="login-btn">Sign in</button>
+        </form>
+        <p id="login-error" class="error" hidden></p>
+      </div>
+    </div>
+
+    <div id="main-screen" hidden>
+      <header class="header">
+        <h1>MS DNS Manager</h1>
+        <button type="button" id="logout-btn" class="btn-ghost">Logout</button>
+      </header>
+      <main class="content">
+        <section class="card">
+          <h2>Zones</h2>
+          <div class="form-row">
+            <label for="zone-select">Zone</label>
+            <select id="zone-select">
+              <option value="">-- Select a zone --</option>
+            </select>
+            <button type="button" id="refresh-zones" class="btn-ghost" title="Refresh zones">↻</button>
+          </div>
+        </section>
+        <section class="card" id="records-section">
+          <h2>Records <span id="zone-label"></span></h2>
+          <div class="form-row form-add-record">
+            <label for="new-type">Type</label>
+            <select id="new-type">
+              <option value="A">A</option>
+              <option value="AAAA">AAAA</option>
+              <option value="CNAME">CNAME</option>
+              <option value="MX">MX</option>
+              <option value="TXT">TXT</option>
+              <option value="NS">NS</option>
+              <option value="PTR">PTR</option>
+              <option value="SRV">SRV</option>
+            </select>
+            <label for="new-name">Name</label>
+            <input id="new-name" type="text" placeholder="e.g. server01" />
+            <span id="new-data-fields"></span>
+            <button type="button" id="add-record" class="btn-primary">Add record</button>
+          </div>
+          <p id="records-error" class="error" hidden></p>
+          <div class="table-wrap">
+            <table id="records-table">
+              <thead>
+                <tr><th>Type</th><th>Name</th><th>Data</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="edit-modal" class="modal" hidden>
+      <div class="modal-backdrop"></div>
+      <div class="modal-content card">
+        <h2>Edit record</h2>
+        <input type="hidden" id="edit-name" />
+        <input type="hidden" id="edit-type" />
+        <div class="form-row">
+          <label>Name</label>
+          <span id="edit-name-display"></span>
+        </div>
+        <div class="form-row">
+          <label>Type</label>
+          <span id="edit-type-display"></span>
+        </div>
+        <div id="edit-data-fields"></div>
+        <div class="modal-actions">
+          <button type="button" id="edit-cancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="edit-save" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/app.js?v=4"></script>
+</body>
+</html>
