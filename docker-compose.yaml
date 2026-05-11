@@ -14,6 +14,11 @@ services:
       - WINRM_USE_HTTPS=${WINRM_USE_HTTPS:-false}
       - WINRM_PORT=${WINRM_PORT:-}
       - WINRM_TRANSPORT=${WINRM_TRANSPORT:-ntlm}
+      - WINRM_CA_BUNDLE=${WINRM_CA_BUNDLE:-}
+      - WINRM_VERIFY_TLS=${WINRM_VERIFY_TLS:-false}
+      - SESSION_BACKEND=${SESSION_BACKEND:-memory}
+      - SESSION_SQLITE_PATH=${SESSION_SQLITE_PATH:-/tmp/msdns_sessions.db}
+      - LOGIN_RATE_LIMIT=${LOGIN_RATE_LIMIT:-10/minute}
       - SECRET_KEY=${SECRET_KEY:-change-this-secret}
     # Optional: use .env file instead of Dockge env
     # env_file: .env

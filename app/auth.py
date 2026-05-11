@@ -1,6 +1,4 @@
 """Session-based auth: login with Windows (WinRM) credentials, stored server-side."""
-import uuid
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -8,50 +6,37 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
 from app.config import config
+from app.session_store import MemorySessionStore, SessionStore
 
 scheme = HTTPBearer(auto_error=False)
 
-# Server-side session store: session_id -> { username, password, created_at }
-# Credentials are only in memory and never logged; sessions expire after 24h.
-_SESSIONS: dict[str, dict] = {}
-_SESSION_TTL = timedelta(hours=24)
+_SESSION_TTL_HOURS = 24
+
+# Default store; replaced by configure_session_store() from main lifespan (e.g. SQLite).
+_store: SessionStore = MemorySessionStore()
 
 
-def _expire_old_sessions() -> None:
-    now = datetime.now(timezone.utc)
-    for sid, data in list(_SESSIONS.items()):
-        if now - data["created_at"] > _SESSION_TTL:
-            del _SESSIONS[sid]
+def configure_session_store(store: SessionStore) -> None:
+    global _store
+    _store = store
 
 
 def create_session(username: str, password: str) -> str:
-    _expire_old_sessions()
-    session_id = str(uuid.uuid4())
-    _SESSIONS[session_id] = {
-        "username": username,
-        "password": password,
-        "created_at": datetime.now(timezone.utc),
-    }
-    return session_id
+    return _store.create_session(username, password)
 
 
 def get_session_credentials(session_id: str) -> tuple[str, str] | None:
-    _expire_old_sessions()
-    data = _SESSIONS.get(session_id)
-    if not data:
-        return None
-    if datetime.now(timezone.utc) - data["created_at"] > _SESSION_TTL:
-        del _SESSIONS[session_id]
-        return None
-    return data["username"], data["password"]
+    return _store.get_session_credentials(session_id)
 
 
 def drop_session(session_id: str) -> None:
-    _SESSIONS.pop(session_id, None)
+    _store.drop_session(session_id)
 
 
 def create_access_token(session_id: str) -> str:
-    expire = datetime.now(timezone.utc) + _SESSION_TTL
+    from datetime import datetime, timedelta, timezone
+
+    expire = datetime.now(timezone.utc) + timedelta(hours=_SESSION_TTL_HOURS)
     return jwt.encode(
         {"sub": session_id, "exp": expire},
         config.SECRET_KEY,

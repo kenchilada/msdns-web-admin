@@ -234,9 +234,21 @@ loginForm.addEventListener('submit', async (e) => {
   }
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => {
-  clearToken();
-  showLoggedIn(false);
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  const token = getToken();
+  try {
+    if (token) {
+      await fetch(API + '/api/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+  } catch (_) {
+    /* still clear client state */
+  } finally {
+    clearToken();
+    showLoggedIn(false);
+  }
 });
 
 // --- Zones & records ---

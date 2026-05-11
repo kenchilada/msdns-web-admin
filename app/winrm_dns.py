@@ -1,6 +1,7 @@
 """Run PowerShell DNS commands on Windows via WinRM."""
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import winrm
@@ -17,12 +18,23 @@ def _session(winrm_user: str, winrm_password: str) -> winrm.Session:
     # WinRM often has Basic=false (only Negotiate/Kerberos); pywinrm must use NTLM from Linux.
     # Domain: NETBIOSDOMAIN\user; local on server: SERVERNAME\user or .\user
     transport = config.WINRM_TRANSPORT or "ntlm"
-    return winrm.Session(
-        url,
-        auth=(winrm_user, winrm_password),
-        transport=transport,
-        server_cert_validation="ignore" if config.WINRM_USE_HTTPS else None,
-    )
+    kw: dict[str, Any] = {}
+    if config.WINRM_USE_HTTPS:
+        bundle = (config.WINRM_CA_BUNDLE or "").strip()
+        if bundle:
+            pem = Path(bundle)
+            if pem.is_file():
+                kw["server_cert_validation"] = "validate"
+                kw["ca_trust_path"] = str(pem.resolve())
+            else:
+                logger.warning("WINRM_CA_BUNDLE path missing (%s); TLS verification disabled", bundle)
+                kw["server_cert_validation"] = "ignore"
+        elif config.WINRM_VERIFY_TLS:
+            kw["server_cert_validation"] = "validate"
+            kw["ca_trust_path"] = "legacy_requests"
+        else:
+            kw["server_cert_validation"] = "ignore"
+    return winrm.Session(url, auth=(winrm_user, winrm_password), transport=transport, **kw)
 
 
 def _run_ps(script: str, winrm_user: str, winrm_password: str) -> tuple[bool, str]:
@@ -38,7 +50,7 @@ def _run_ps(script: str, winrm_user: str, winrm_password: str) -> tuple[bool, st
         out = (r.std_out or b"").decode("utf-8", errors="replace").strip()
         return True, out
     except Exception as e:
-        logger.exception("WinRM error")
+        logger.warning("WinRM error: %s", e)
         return False, str(e)
 
 
