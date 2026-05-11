@@ -13,6 +13,7 @@ services:
       - WINDOWS_DNS_HOST=${WINDOWS_DNS_HOST:-}
       - WINRM_USE_HTTPS=${WINRM_USE_HTTPS:-false}
       - WINRM_PORT=${WINRM_PORT:-}
+      - WINRM_TRANSPORT=${WINRM_TRANSPORT:-ntlm}
       - SECRET_KEY=${SECRET_KEY:-change-this-secret}
     # Optional: use .env file instead of Dockge env
     # env_file: .env

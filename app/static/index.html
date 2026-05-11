@@ -12,7 +12,7 @@
       <div class="card login-card">
         <h1>MS DNS Manager</h1>
         <p class="subtitle">Manage DNS records on Windows DNS</p>
-        <p class="hint">Sign in with your Windows account (DNS server access). Try <strong>username</strong> or <strong>domain\username</strong>.</p>
+        <p class="hint">Sign in with your Windows account (DNS server access). Use <strong>NETBIOSDOMAIN\username</strong> (e.g. <code>galaxy\ken</code>). Plain username only works for local accounts as <strong>SERVERNAME\username</strong>.</p>
         <form id="login-form">
           <label for="username">Windows username</label>
           <input id="username" name="username" type="text" autocomplete="username" placeholder="e.g. user or domain\user" required />

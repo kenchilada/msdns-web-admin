@@ -14,8 +14,9 @@ def _session(winrm_user: str, winrm_password: str) -> winrm.Session:
     protocol = "https" if config.WINRM_USE_HTTPS else "http"
     port = config.WINRM_PORT or (5986 if config.WINRM_USE_HTTPS else 5985)
     url = f"{protocol}://{config.WINDOWS_DNS_HOST}:{port}/wsman"
-    # Domain\username requires NTLM; basic auth only works for local accounts
-    transport = "ntlm" if "\\" in winrm_user else "basic"
+    # WinRM often has Basic=false (only Negotiate/Kerberos); pywinrm must use NTLM from Linux.
+    # Domain: NETBIOSDOMAIN\user; local on server: SERVERNAME\user or .\user
+    transport = config.WINRM_TRANSPORT or "ntlm"
     return winrm.Session(
         url,
         auth=(winrm_user, winrm_password),

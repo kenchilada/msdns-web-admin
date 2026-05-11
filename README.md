@@ -49,6 +49,7 @@ Dockge typically doesn’t build images from a Git repo, so this project publish
    | `WINDOWS_DNS_HOST` | IP or hostname of the Windows DNS server |
    | `WINRM_USE_HTTPS` | `true` for HTTPS (port 5986), else HTTP (5985) |
    | `WINRM_PORT` | Optional; default 5985 or 5986 |
+   | `WINRM_TRANSPORT` | Optional; default `ntlm`. Use when WinRM has Basic disabled (typical). Kerberos requires extra container krb5 setup. |
    | `SECRET_KEY` | Secret for JWT; set to a random string in production |
 
 4. **Deploy.** Open the app at `http://your-host:8766`, sign in with your **Windows username and password** (the account that has DNS access), then select a zone and manage records.
